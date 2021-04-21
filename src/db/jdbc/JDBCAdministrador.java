@@ -11,7 +11,7 @@ public class JDBCAdministrador implements DBAdministrador {
 	final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private Connection c;
 
-	private static void initializeDB() {
+	private void initializeDB() {
 		try {
 			Class.forName("org.sqlite.JDBC");
 			c = DriverManager.getConnection("jdbc:sqlite:./midb.db");
