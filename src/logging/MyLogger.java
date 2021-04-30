@@ -10,7 +10,7 @@ import java.util.logging.*;
 public class MyLogger {
     final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private final static Level LOGGER_LVL = Level.FINEST;
-    private final static Level CONSOLE_LVL = Level.WARNING;
+    private final static Level CONSOLE_LVL = Level.INFO;
     private final static Level FILE_LVL = Level.FINEST;
     private final static String LOGGING_FILE = "./lib/logging.properties";
     
