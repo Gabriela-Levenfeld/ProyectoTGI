@@ -12,13 +12,18 @@ import java.util.logging.Logger;
 
 import db.interfaces.DBManager;
 import pojos.Pieza;
+import pojos.Vehiculo;
 
 public class JDBCManager implements DBManager {
 	final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private Connection c;
 	private final String addPieza = "INSERT INTO Piezas (Tipo) VALUES(?);";
 	private final String searchPieza = "SELECT * FROM Piezas;";
-	private final String eliminarUnaPieza = "DELETE FROM Piezas WHERE idPieza = ?;";
+	private final String eliminarUnaPieza = "DELETE FROM Piezas WHERE IdPieza = ?;";
+	private final String searchVehiculo = "SELECT * FROM Vehiculos;";
+	private final String addVehiculo = "INSERT INTO Vehiculos (Marca, Modelo) VALUES (?, ?);";
+	private final String eliminarUnVehiculo = "DELETE FROM Vehiculos WHERE Modelo = ?;";
+	private final String searchVehiculoPorMarca = "SELECT * FROM Vehiculos WHERE Marca = ?;";
 
 	@Override
 	public void connect() {
@@ -44,10 +49,12 @@ public class JDBCManager implements DBManager {
 		// Inicializar Base de Datos
 		try {
 			Statement stmt = c.createStatement();
-			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "Vehiculos (Modelo STRING PRIMARY KEY, Marca STRING)");
-			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS "
-					+ "Piezas (IdPieza INTEGER PRIMARY KEY, Tipo STRING)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+							+ "Vehiculos (Modelo STRING PRIMARY KEY, Marca STRING)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+							+ "Piezas (IdPieza INTEGER PRIMARY KEY, Tipo STRING)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+							+ "PiezasVehiculos (Id INTEGER PRIMARY KEY, IdPieza INTEGER REFERENCES Piezas ON DELETE CASCADE, Modelo STRING REFERENCES Vehiculos ON DELETE CASCADE, Precio REAL)");
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.severe("Error al crear las tablas");
@@ -119,6 +126,109 @@ public class JDBCManager implements DBManager {
 			e.printStackTrace();
 		}
 		return existe;
+	}
+
+
+	@Override
+	public List<Vehiculo> searchVehiculos() {
+		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+		try {
+			Statement stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(searchVehiculo);
+			
+			while(rs.next()) {
+				String marca = rs.getString("Marca");
+				String modelo = rs.getString("Modelo");
+				Vehiculo vehiculo = new Vehiculo(marca, modelo);
+				vehiculos.add(vehiculo);
+				LOGGER.fine("Vehículo encontrado: " + vehiculo);
+			}
+			rs.close();
+			stmt.close();			
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un SELECT");
+			e.printStackTrace();
+		}
+		return vehiculos;
+	}
+
+
+	@Override
+	public void addVehiculo(Vehiculo vehiculo) {
+		try {
+			PreparedStatement prep = c.prepareStatement(addVehiculo);
+			prep.setString(1, vehiculo.getMarca());
+			prep.setString(2, vehiculo.getModelo());
+			prep.executeUpdate();
+			prep.close();
+		}catch(SQLException e) {
+			LOGGER.severe("Error al insertar vehículo " + vehiculo);
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public boolean eliminarVehiculo(String modelo) {
+		boolean existe = false;
+		try {
+			PreparedStatement prep = c.prepareStatement(eliminarUnVehiculo);
+			prep.setString(1,modelo);
+			int filasModificadas = prep.executeUpdate();
+			if(filasModificadas == 1)
+				existe = true;
+			prep.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return existe;
+	}
+
+
+	@Override
+	public List<Vehiculo> searchVehiculoByMarca(String marcaABuscar) {
+		List<Vehiculo> vehiculos = new ArrayList<Vehiculo>();
+		try {
+			PreparedStatement prep = c.prepareStatement(searchVehiculoPorMarca);
+			//prep.setString(1,"%" + marca + "%");
+			prep.setString(1,marcaABuscar);
+			ResultSet rs = prep.executeQuery();
+			while(rs.next()){
+				String marca = rs.getString("Marca");
+				String modelo = rs.getString("Modelo");
+				Vehiculo vehiculo = new Vehiculo (marca, modelo);
+				vehiculos.add(vehiculo);
+				LOGGER.fine("Vehículo encontrado: " + vehiculo);
+			}
+			prep.close();
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un SELECT");
+			e.printStackTrace();
+		}
+		return vehiculos;
+	}
+
+
+	@Override
+	public Pieza searchPiezaById(int idPieza) {
+		Pieza pieza = null;
+		try {
+			PreparedStatement prep = c.prepareStatement(searchPiezaById);
+			prep.setString(1,idPieza + "");
+			ResultSet rs = prep.executeQuery();
+			while(rs.next()){
+				int idPieza = rs.getInt("IdPieza");
+				String tipo = rs.getString("Tipo");
+				pieza = new Pieza(idPieza, tipo);
+				pieza.add(pieza);
+				LOGGER.fine("Pieza encontrada buscanda por id: " + pieza);
+			}
+			prep.close();
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un SELECT");
+			e.printStackTrace();
+		}
+		return pieza;
 	}
 	
 
