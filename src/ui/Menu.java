@@ -34,7 +34,7 @@ public class Menu {
 				respuesta = Integer.parseInt(reader.readLine());
 				LOGGER.info("El usuario elije " + respuesta);
 			} catch (NumberFormatException | IOException e) {
-				LOGGER.warning("El usuario no ha introducido un numero valido.");
+				LOGGER.warning("El usuario no ha introducido un numero válido.");
 				e.printStackTrace();
 			}
 			switch(respuesta) {
@@ -54,11 +54,10 @@ public class Menu {
 					descatalogarUnaMarca();
 					break;
 				case 6:
-					//addPrecio();
+					addPrecio();
 					break;
 				case 7:
-					break;
-				case 8:
+					modificarPrecio();
 					break;
 				case 0:
 					System.out.println("Fin");
@@ -70,6 +69,7 @@ public class Menu {
 			}
 		}
 		
+		
 	}
 
 	private static void menuAdministrador() {
@@ -80,8 +80,7 @@ public class Menu {
 		System.out.println("4- Eliminar vehículo");
 		System.out.println("5- Descatalogar una marca");
 		System.out.println("6- Añadir precio");
-		System.out.println("7- Eliminar precio"); //Tema2, diapo 28
-		System.out.println("8- Modificar precio");
+		System.out.println("7- Modificar precio");
 		System.out.println("0- Salir");		
 	}
 	
@@ -107,7 +106,6 @@ public class Menu {
 			Pieza pieza = new Pieza(nombre);
 			dbman.addPieza(pieza);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
@@ -213,17 +211,37 @@ public class Menu {
 			searchVehiculos();
 			System.out.println("Introduzca el modelo del vehículo:");
 			String modelo = reader.readLine();
-			Vehiculo vehiculo = dbman.searchVehiculoByMarca(modelo);
+			Vehiculo vehiculo = dbman.searchVehiculoByModelo(modelo);
 			
-			System.out.println("Introduzca el precio:");
-			float precio = Float.parseFloat(reader.readLine());
-			
-			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(pieza, vehiculo, precio);
-			dbman.addPiezaVehiculo(piezaVehiculo);
-		} catch (IOException e) {
+			if(pieza == null || vehiculo == null) {
+				System.out.println("Los datos introducidos son incorrectos");
+			}else {
+				System.out.println("Introduzca el precio (utilice punto, no coma):");
+				double precio = Double.parseDouble(reader.readLine());
+				
+				PiezaVehiculo piezaVehiculo = new PiezaVehiculo(pieza, vehiculo, precio);
+				boolean existe = dbman.addPrecio(piezaVehiculo);;
+				if (existe == false ) {
+					System.out.println("El precio no se ha añadido porque los datos introducidos son incorrectos");
+				}else {
+					System.out.println("El precio se ha añadido correctamente");
+				}	
+			}		
+		} catch (NullPointerException | IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
 	
+	private static void mostrarPiezaVehiculoPrecio() {
+		List<PiezaVehiculo> piezasVehiculos = dbman.searchPiezasVehiculos();
+		System.out.println("Se han encontrado las siguientes piezas y vehículos: ");
+		for(PiezaVehiculo piezavehiculo : piezasVehiculos) {
+			System.out.println(piezavehiculo);
+		}		
+	}
+
+	private static void modificarPrecio() {
+		mostrarPiezaVehiculoPrecio();		
+	}
 }

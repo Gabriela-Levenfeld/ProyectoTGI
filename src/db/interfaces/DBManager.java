@@ -3,6 +3,7 @@ package db.interfaces;
 import java.util.List;
 
 import pojos.Pieza;
+import pojos.PiezaVehiculo;
 import pojos.Vehiculo;
 
 public interface DBManager {
@@ -27,4 +28,10 @@ public interface DBManager {
 	public List<Vehiculo> searchVehiculoByMarca(String marca);
 
 	public Pieza searchPiezaById(int idPieza);
+
+	public Vehiculo searchVehiculoByModelo(String modelo);
+
+	public boolean addPrecio(PiezaVehiculo piezaVehiculo);
+
+	public List<PiezaVehiculo> searchPiezasVehiculos();
 }

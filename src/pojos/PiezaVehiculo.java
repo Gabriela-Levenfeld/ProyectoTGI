@@ -1,16 +1,25 @@
 package pojos;
 
 public class PiezaVehiculo {
+	int id;
 	private Pieza pieza;
 	private Vehiculo vehiculo;
-	private float precio;
+	private double precio;
 	
 	public PiezaVehiculo(){
 		super();
 	}
 	
-	public PiezaVehiculo(Pieza pieza, Vehiculo vehiculo, float precio){
+	public PiezaVehiculo(Pieza pieza, Vehiculo vehiculo, double precio){
 		super();
+		this.pieza = pieza;
+		this.vehiculo = vehiculo;
+		this.precio = precio;
+	}
+	
+	public PiezaVehiculo(int id, Pieza pieza, Vehiculo vehiculo, double precio){
+		super();
+		this.id = id;
 		this.pieza = pieza;
 		this.vehiculo = vehiculo;
 		this.precio = precio;
@@ -28,17 +37,23 @@ public class PiezaVehiculo {
 	public void setVehiculo(Vehiculo vehiculo) {
 		this.vehiculo = vehiculo;
 	}
-	public float getPrecio() {
+	public double getPrecio() {
 		return precio;
 	}
-	public void setPrecio(float precio) {
+	public void setPrecio(double precio) {
 		this.precio = precio;
 	}
-	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	@Override
 	public String toString() {
-		return "PiezaVehiculo [pieza=" + pieza + ", vehiculo=" + vehiculo + ", precio=" + precio + "]";
+		return "PiezaVehiculo [id=" + id + ", pieza=" + pieza + ", vehiculo=" + vehiculo + ", precio=" + precio + "]";
 	}
-	
 
 }
