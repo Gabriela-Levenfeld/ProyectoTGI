@@ -3,6 +3,7 @@ package ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -11,6 +12,8 @@ import db.jdbc.JDBCManager;
 import logging.MyLogger;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
+import pojos.Tienda;
+import pojos.Usuario;
 import pojos.Vehiculo;
 
 public class Menu {
@@ -18,18 +21,57 @@ public class Menu {
 	private static DBManager dbman = new JDBCManager();
 	private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 	
+	private final static String[] TIENDAS_NOMBRES = {"Pozuelo", "Alcobendas", "Madrid", "Parla"};
+	private final static String[] TIENDAS_HORARIO = {"8:00-14:00","8:00-14:00", "14:00-20:00","8:00-20:00"};
+	
 	public static void main(String[] args) {
 		try {
 			MyLogger.setup();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		dbman.connect();
-		int respuesta = -1;
 		
+		int respuesta;
+		do {
+			System.out.println("\nElige una opción:");
+			System.out.println("1. Usuario");
+			System.out.println("2. Administrador");
+			System.out.println("0. Salir");
+			try {
+				respuesta = Integer.parseInt(reader.readLine());
+				LOGGER.info("El usuario elige " + respuesta);
+			} catch (NumberFormatException | IOException e) {
+				respuesta = -1;
+				LOGGER.warning("El usuario no ha introducido un número");
+				e.printStackTrace();
+			}
+			switch(respuesta) {
+				case 1:
+					menuUsuario();
+					break;
+				case 2:
+					menuAdministrador();
+					break;
+				case 0:
+					break;
+			}
+		}while(respuesta != 0);
+		menuAdministrador();
+	}
+
+	private static void menuAdministrador() {
+		int respuesta = -1;
 		while(respuesta != 0) {
-			menuAdministrador();
+			System.out.println("Elije una opción: ");
+			System.out.println("1- Añadir nueva pieza");
+			System.out.println("2- Eliminar pieza");
+			System.out.println("3- Añadir nuevo vehículo");
+			System.out.println("4- Eliminar vehículo");
+			System.out.println("5- Descatalogar una marca");
+			System.out.println("6- Añadir precio");
+			System.out.println("7- Modificar precio");
+			System.out.println("0- Regreso a menú principal");	
 			try {
 				respuesta = Integer.parseInt(reader.readLine());
 				LOGGER.info("El usuario elije " + respuesta);
@@ -60,35 +102,49 @@ public class Menu {
 					modificarPrecio();
 					break;
 				case 0:
-					System.out.println("Fin");
-					dbman.disconnect();
+					System.out.println("Regreso a menú principal");
 					break;
 				default:
 					System.out.println("El número introducido es incorrecto");
 					break;
 			}
-		}
-		
-		
-	}
-
-	private static void menuAdministrador() {
-		System.out.println("Elije una opción: ");
-		System.out.println("1- Añadir nueva pieza");
-		System.out.println("2- Eliminar pieza");
-		System.out.println("3- Añadir nuevo vehículo");
-		System.out.println("4- Eliminar vehículo");
-		System.out.println("5- Descatalogar una marca");
-		System.out.println("6- Añadir precio");
-		System.out.println("7- Modificar precio");
-		System.out.println("0- Salir");		
+		}	
 	}
 	
 	private static void menuUsuario() {
-		System.out.println("Elije una opción: ");
-		System.out.println("0- Salir");		
+		int respuesta = -1;
+		while(respuesta != 0) {
+			System.out.println("Elije una opción: ");
+			System.out.println("1- Mostrar catálogo");
+			System.out.println("2- Registro");
+			//System.out.println("3- Compra");
+			System.out.println("0- Regreso a menú principal");	
+			try {
+				respuesta = Integer.parseInt(reader.readLine());
+				LOGGER.info("El usuario elije " + respuesta);
+			} catch (NumberFormatException | IOException e) {
+				LOGGER.warning("El usuario no ha introducido un numero válido.");
+				e.printStackTrace();
+			}
+			switch(respuesta) {
+				case 1:
+					mostrarPiezaVehiculoPrecio();
+					break;
+				case 2:
+					break;
+				case 3:
+					//compra();
+					break;
+				case 0:
+					System.out.println("Fin");
+					break;
+				default:
+					System.out.println("El número introducido es incorrecto");
+					break;
+			}
+		}	
 	}
-	
+
 	private static void searchPiezas() {
 		List<Pieza> piezas = dbman.searchPiezas();
 		System.out.println("Se han encontrado las siguientes piezas: ");
@@ -229,8 +285,7 @@ public class Menu {
 			}		
 		} catch (NullPointerException | IOException e) {
 			e.printStackTrace();
-		}
-		
+		}	
 	}
 	
 	private static void mostrarPiezaVehiculoPrecio() {
@@ -242,6 +297,85 @@ public class Menu {
 	}
 
 	private static void modificarPrecio() {
-		mostrarPiezaVehiculoPrecio();		
+		mostrarPiezaVehiculoPrecio();
+		try {
+			System.out.println("Introduzca el id de la fila a modificar:");
+			int idPrecioAModificar = Integer.parseInt(reader.readLine());
+			
+			System.out.println("Introduzca el precio actualizado (utilice punto, no coma):");
+			double precio = Double.parseDouble(reader.readLine());
+				
+			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(idPrecioAModificar);
+			boolean existe = dbman.updatePrecio(piezaVehiculo);;
+			if (existe == false ) {
+				System.out.println("El precio no se ha añadido porque los datos introducidos son incorrectos");
+			}else {
+				System.out.println("El precio se ha actualizado correctamente");
+			}			
+		} catch (NullPointerException | IOException e) {
+			e.printStackTrace();
+		}
+	}
+/*
+	private static void compra() {
+		List<Tienda> tiendas = dbman.mostrarTiendas();
+		if(tiendas.size()==0) {
+			generarTiendas();
+			System.out.println("Estoy en el if");
+		}else {
+			System.out.println("Estoy en el else");
+			try {
+			//PEDIDO tiene:
+			 //	private Date fecha;
+				//private boolean online;
+				//private Tienda tienda;
+				//private Usuario usuario;
+				
+				System.out.println("COMPRA\n");
+				//Pedir DNI
+				mostrarPiezaVehiculoPrecio();
+				System.out.println("Introduzca el id de la fila a comprar:");
+				int idCompra = Integer.parseInt(reader.readLine());
+				
+				System.out.println("Introduzca la cantidad a comprar:");
+				int cantidad = Integer.parseInt(reader.readLine());
+				
+				System.out.println("¿Pedido online?(s/n)");
+				String respuesta = reader.readLine();
+				if(respuesta.equalsIgnoreCase("n")) { //En tienda
+					mostrarTiendas();
+					System.out.println("Introduzca el id de la tienda donde quiera recoger el pedido:");
+					int idTienda = Integer.parseInt(reader.readLine());
+				}else {
+					System.out.println("El pedido se enviará a su casa.");
+				}
+				Pedido pedido = new Pedido();
+				PedidoPiezaVehiculo pedidoPiezaVehiculo = new PedidoPiezaVehiculo();
+				
+				System.out.println("Fin del pedido, que tenga un buen día");
+				
+			} catch (NullPointerException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+*/
+	
+	private static void generarTiendas() {
+		int numTiendas = 4;
+		for(int i = 0; i < numTiendas; i++) {
+			Tienda tienda = new Tienda(TIENDAS_NOMBRES[i], TIENDAS_HORARIO[i]);
+			dbman.insertarTienda(tienda);
+		}
+		System.out.println("Se han generado " + numTiendas + " tiendas.");
+		mostrarTiendas();
+	}
+	
+	private static void mostrarTiendas() {
+		List<Tienda> tiendas = dbman.mostrarTiendas();
+		System.out.println("Se han encontrado las siguientes tiendas: ");
+		for(Tienda tienda : tiendas) {
+			System.out.println(tienda);
+		}
 	}
 }

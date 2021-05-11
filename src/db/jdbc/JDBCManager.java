@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import db.interfaces.DBManager;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
+import pojos.Tienda;
 import pojos.Vehiculo;
 
 public class JDBCManager implements DBManager {
@@ -30,6 +31,9 @@ public class JDBCManager implements DBManager {
 	private final String searchVehiculoByModelo = "SELECT * FROM Vehiculos WHERE Modelo = ?;";
 	private final String addPrecio = "INSERT INTO PiezasVehiculos (IdPieza, Modelo, Precio) VALUES (?,?,?);";
 	private final String searchtablaConPrecio = "SELECT * FROM PiezasVehiculos;";
+	private final String updatePrecio = "UPDATE PiezasVehiculos SET Precio = ? WHERE Id = ?;";
+	private final String searchTiendas ="SELECT * FROM Tiendas;";
+	private final String insertarTiendas = "INSERT INTO Tiendas (Localizacion, Horario) VALUES (?,?);";
 	
 	@Override
 	public void connect() {
@@ -56,11 +60,19 @@ public class JDBCManager implements DBManager {
 		try {
 			Statement stmt = c.createStatement();
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-							+ "Vehiculos (Modelo STRING PRIMARY KEY, Marca STRING)");
+					+ "Vehiculos (Modelo STRING PRIMARY KEY, Marca STRING)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-							+ "Piezas (IdPieza INTEGER PRIMARY KEY, Tipo STRING NOT NULL)");
+					+ "Piezas (IdPieza INTEGER PRIMARY KEY, Tipo STRING NOT NULL)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-							+ "PiezasVehiculos (Id INTEGER PRIMARY KEY, IdPieza INTEGER REFERENCES Piezas ON DELETE CASCADE, Modelo STRING REFERENCES Vehiculos ON DELETE CASCADE, Precio REAL)");
+					+ "PiezasVehiculos (Id INTEGER PRIMARY KEY, IdPieza INTEGER REFERENCES Piezas ON DELETE CASCADE, Modelo STRING REFERENCES Vehiculos ON DELETE CASCADE, Precio REAL)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+					+ "Tiendas (Id INTEGER PRIMARY KEY, Localizacion STRING, Horario STRING)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas, IdUsuario INTEGER REFERENCES Usuarios)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+					+ "Usuarios (Dni STRING PRIMARY KEY, Nombre STRING, Apellidos STRING, CodigoPostal INTEGER, Direccion STRING, Localidad STRING, Tarjeta INTEGER)");
+			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
+					+ "PedidosPiezaVehiculo (Id INTEGER PRIMARY KEY, Cantidad INTEGER, IdPedido INTEGER REFERENCES Pedidos, IdPiezaVehiculo REFERENCES PiezasVehiculos)");
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.severe("Error al crear las tablas");
@@ -263,7 +275,6 @@ public class JDBCManager implements DBManager {
 	@Override
 	public boolean addPrecio(PiezaVehiculo piezaVehiculo) {
 		boolean existe = false;
-		//Antes estaba sin el if-else
 		try {
 			PreparedStatement prep = c.prepareStatement(addPrecio);
 			prep.setInt(1, piezaVehiculo.getPieza().getIdPieza());
@@ -306,6 +317,61 @@ public class JDBCManager implements DBManager {
 		}
 		return tablaConPrecio;
 	}
+
+
+	@Override
+	public boolean updatePrecio(PiezaVehiculo piezaVehiculo) {
+		boolean existe = false;
+		try {
+			PreparedStatement prep = c.prepareStatement(updatePrecio);
+			prep.setDouble(1, piezaVehiculo.getPrecio());
+			prep.setInt(2, piezaVehiculo.getId());
+			int filasModificadas = prep.executeUpdate();
+			if(filasModificadas == 1)
+				existe = true;
+			prep.close();
+		}catch(SQLException e) {
+			LOGGER.severe("Error al actualizar el precio");
+			e.printStackTrace();
+		}
+		return existe;
+	}
+
+	@Override
+	public List<Tienda> mostrarTiendas() {
+		List<Tienda> tiendas = new ArrayList<Tienda>();
+		try {
+			Statement stmt = c.createStatement();
+			ResultSet rs = stmt.executeQuery(searchTiendas);
+			
+			while(rs.next()) {
+				int idTienda = rs.getInt("Id");
+				String localizacion = rs.getString("Localizacion");
+				String horario = rs.getString("Horario");
+				Tienda tienda = new Tienda(idTienda, localizacion, horario);
+				tiendas.add(tienda);
+				LOGGER.fine("Tienda encontrada: " + tienda);
+			}
+			rs.close();
+			stmt.close();			
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un SELECT");
+			e.printStackTrace();
+		}
+		return tiendas;
+	}
 	
+	public void insertarTienda(Tienda tienda) {
+		try {
+			PreparedStatement prep = c.prepareStatement(insertarTiendas);
+			prep.setString(1, tienda.getLocalizacion());
+			prep.setString(2, tienda.getHorario());
+			prep.executeUpdate();
+			prep.close();			
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un INSERT");
+			e.printStackTrace();
+		}
+	}
 
 }

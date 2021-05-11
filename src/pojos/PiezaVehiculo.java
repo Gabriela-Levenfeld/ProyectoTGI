@@ -25,6 +25,11 @@ public class PiezaVehiculo {
 		this.precio = precio;
 	}
 	
+	public PiezaVehiculo(int id){
+		super();
+		this.id = id;
+	}
+	
 	public Pieza getPieza() {
 		return pieza;
 	}

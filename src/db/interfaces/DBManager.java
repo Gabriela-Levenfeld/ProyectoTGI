@@ -4,6 +4,7 @@ import java.util.List;
 
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
+import pojos.Tienda;
 import pojos.Vehiculo;
 
 public interface DBManager {
@@ -34,4 +35,10 @@ public interface DBManager {
 	public boolean addPrecio(PiezaVehiculo piezaVehiculo);
 
 	public List<PiezaVehiculo> searchPiezasVehiculos();
+
+	public boolean updatePrecio(PiezaVehiculo piezaVehiculo);
+
+	public List<Tienda> mostrarTiendas();
+
+	public void insertarTienda(Tienda tiendas);
 }
