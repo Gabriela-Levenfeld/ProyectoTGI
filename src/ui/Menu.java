@@ -16,6 +16,8 @@ import pojos.Tienda;
 import pojos.Usuario;
 import pojos.Vehiculo;
 
+//Opcion: "MODIFICAR PRECIO" NO FUNCIONA
+
 public class Menu {
 	final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static DBManager dbman = new JDBCManager();
@@ -54,10 +56,10 @@ public class Menu {
 					menuAdministrador();
 					break;
 				case 0:
+					System.out.println("Fin del programa");
 					break;
 			}
 		}while(respuesta != 0);
-		menuAdministrador();
 	}
 
 	private static void menuAdministrador() {
@@ -283,7 +285,7 @@ public class Menu {
 					System.out.println("El precio se ha añadido correctamente");
 				}	
 			}		
-		} catch (NullPointerException | IOException e) {
+		} catch (NumberFormatException|NullPointerException| IOException e) {
 			e.printStackTrace();
 		}	
 	}
@@ -300,12 +302,12 @@ public class Menu {
 		mostrarPiezaVehiculoPrecio();
 		try {
 			System.out.println("Introduzca el id de la fila a modificar:");
-			int idPrecioAModificar = Integer.parseInt(reader.readLine());
+			int idFilaPrecioAModificar = Integer.parseInt(reader.readLine());
 			
 			System.out.println("Introduzca el precio actualizado (utilice punto, no coma):");
 			double precio = Double.parseDouble(reader.readLine());
 				
-			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(idPrecioAModificar);
+			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(idFilaPrecioAModificar);
 			boolean existe = dbman.updatePrecio(piezaVehiculo);;
 			if (existe == false ) {
 				System.out.println("El precio no se ha añadido porque los datos introducidos son incorrectos");
@@ -316,7 +318,7 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
-/*
+	/*
 	private static void compra() {
 		List<Tienda> tiendas = dbman.mostrarTiendas();
 		if(tiendas.size()==0) {

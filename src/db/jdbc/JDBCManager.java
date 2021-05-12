@@ -68,11 +68,11 @@ public class JDBCManager implements DBManager {
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "Tiendas (Id INTEGER PRIMARY KEY, Localizacion STRING, Horario STRING)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas, IdUsuario INTEGER REFERENCES Usuarios)");
+					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas ON DELETE CASCADE, IdUsuario INTEGER REFERENCES Usuarios ON DELETE CASCADE)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "Usuarios (Dni STRING PRIMARY KEY, Nombre STRING, Apellidos STRING, CodigoPostal INTEGER, Direccion STRING, Localidad STRING, Tarjeta INTEGER)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-					+ "PedidosPiezaVehiculo (Id INTEGER PRIMARY KEY, Cantidad INTEGER, IdPedido INTEGER REFERENCES Pedidos, IdPiezaVehiculo REFERENCES PiezasVehiculos)");
+					+ "PedidosPiezaVehiculo (Id INTEGER PRIMARY KEY, Cantidad INTEGER, IdPedido INTEGER REFERENCES Pedidos ON DELETE CASCADE, IdPiezaVehiculo REFERENCES PiezasVehiculos ON DELETE CASCADE)");
 			stmt.close();
 		} catch (SQLException e) {
 			LOGGER.severe("Error al crear las tablas");
