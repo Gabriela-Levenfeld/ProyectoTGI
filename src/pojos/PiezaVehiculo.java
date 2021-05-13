@@ -25,6 +25,12 @@ public class PiezaVehiculo {
 		this.precio = precio;
 	}
 	
+	public PiezaVehiculo(int id, double precio){
+		super();
+		this.id = id;
+		this.precio = precio;
+	}
+	
 	public PiezaVehiculo(int id){
 		super();
 		this.id = id;

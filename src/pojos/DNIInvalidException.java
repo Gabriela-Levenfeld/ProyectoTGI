@@ -1,4 +1,4 @@
-package proyecto;
+package pojos;
 
 public class DNIInvalidException extends Exception {
 

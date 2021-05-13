@@ -1,10 +1,12 @@
-package proyecto;
+package pojos;
+//Un DNI tiene 8 numeros y una letra
 
 import java.util.Random;
 
 public class DNI {
-	private int numero;
-	private char letra;
+
+    private int numero;
+    private char letra;
     private final String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
 
     public DNI(int numero) {
@@ -18,19 +20,18 @@ public class DNI {
     }
 
     public DNI(String dni) throws DNIInvalidException {
-        //Aquí compruebo que esté bien el numero y la letra del DNI
+        //Aqui tengo que comprobar que esta bien el numero y la letra del DNI
         char letraDni;
         letraDni = ' ';
         String numerosDni = "";
 
         String numeroDNI = dni.substring(0, dni.length() - 1);
         letraDni = dni.charAt(dni.length() - 1);
-    }
-    
 
-    //Constructor por defecto que genere un DNI correcto
+    }
+
+    //Constructor por defecto que genere un DNI aleatorio correcto
     public DNI() {
-        //Generamos número aleatoriamente
         Random rand = new Random();
         this.numero = rand.nextInt(100000000);
         this.letra = (generarLetra(numero));
@@ -38,7 +39,6 @@ public class DNI {
     }
 
     public char generarLetra(int numero) {
-        //Ahora sacamos la letras
         int resto = numero % letras.length();
         return letras.charAt(resto);
     }

@@ -3,17 +3,23 @@ package ui;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.MessageDigest;
 import java.sql.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
 import db.interfaces.DBManager;
+import db.interfaces.UsuariosManager;
 import db.jdbc.JDBCManager;
+import db.jpa.JPAUsuariosManager;
 import logging.MyLogger;
+import pojos.DNI;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
+import pojos.Rol;
 import pojos.Tienda;
 import pojos.Usuario;
+import pojos.UsuarioJPA;
 import pojos.Vehiculo;
 
 //Opcion: "MODIFICAR PRECIO" NO FUNCIONA
@@ -21,6 +27,7 @@ import pojos.Vehiculo;
 public class Menu {
 	final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	private static DBManager dbman = new JDBCManager();
+	private static UsuariosManager userman = new JPAUsuariosManager();
 	private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 	
 	private final static String[] TIENDAS_NOMBRES = {"Pozuelo", "Alcobendas", "Madrid", "Parla"};
@@ -33,8 +40,35 @@ public class Menu {
 			e.printStackTrace();
 		}
 		dbman.connect();
+		userman.connect();
 		
 		int respuesta;
+		do {
+			System.out.println("\nElige una opción:");
+			System.out.println("1. Registrarse");
+			System.out.println("2. Login");
+			System.out.println("0. Salir");
+			try {
+				respuesta = Integer.parseInt(reader.readLine());
+				LOGGER.info("El usuario elige " + respuesta);
+			} catch (NumberFormatException | IOException e) {
+				respuesta = -1;
+				LOGGER.warning("El usuario no ha introducido un número");
+				e.printStackTrace();
+			}
+			switch(respuesta) {
+				case 1:
+					registrarse();
+					break;
+				case 2:
+					login();
+					break;
+				case 0:
+					break;
+			}
+		} while (respuesta != 0);
+
+		/*
 		do {
 			System.out.println("\nElige una opción:");
 			System.out.println("1. Usuario");
@@ -59,7 +93,59 @@ public class Menu {
 					System.out.println("Fin del programa");
 					break;
 			}
-		}while(respuesta != 0);
+		}while(respuesta != 0);*/
+		userman.disconnect();
+		dbman.disconnect();
+	}
+
+	private static void registrarse() {
+		try {
+			System.out.println("Indique su DNI:");
+			//Buscar DNI
+			DNI dni = reader.readLine();
+			System.out.println("Indique su contraseña:");
+			String pass = reader.readLine();
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(pass.getBytes());
+			byte[] hash = md.digest();
+			
+			System.out.println(userman.getRoles());
+			System.out.println("Indique el id del rol:");
+			int rolId = Integer.parseInt(reader.readLine());
+			Rol rol = userman.getRolById(rolId);
+			if(rol == null) {
+				System.out.println("No existe dicho rol.");
+			}else {
+				System.out.println("Indique su nombre:");
+				String nombre = reader.readLine();
+				System.out.println("Indique su apellido:");
+				String apellido = reader.readLine();
+				System.out.println("Indique su Código Postal:");
+				int codigoPostal = Integer.parseInt(reader.readLine());
+				System.out.println("Indique su direccion:");
+				String direccion = reader.readLine();
+				System.out.println("Indique su número de tarjeta:");
+				int tarjeta = Integer.parseInt(reader.readLine());				
+			}
+			
+			UsuarioJPA usuario = new UsuarioJPA(dni, hash, rol);
+			LOGGER.info(usuario.toString());
+			userman.addUsuario(usuario);
+			System.out.println("Te has registrado con éxito");
+			LOGGER.info(usuario.toString());
+			Cliente cliente = new Cliente (usuario.getId(), nombre);
+			dbman.addCliente(cliente);
+		} catch (IOException e) {
+			LOGGER.warning("Error al registrarse");
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void login() {
+		
 	}
 
 	private static void menuAdministrador() {
@@ -307,7 +393,7 @@ public class Menu {
 			System.out.println("Introduzca el precio actualizado (utilice punto, no coma):");
 			double precio = Double.parseDouble(reader.readLine());
 				
-			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(idFilaPrecioAModificar);
+			PiezaVehiculo piezaVehiculo = new PiezaVehiculo(idFilaPrecioAModificar, precio);
 			boolean existe = dbman.updatePrecio(piezaVehiculo);;
 			if (existe == false ) {
 				System.out.println("El precio no se ha añadido porque los datos introducidos son incorrectos");
