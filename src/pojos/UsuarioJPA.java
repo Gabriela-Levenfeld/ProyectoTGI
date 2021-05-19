@@ -19,7 +19,6 @@ public class UsuarioJPA implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
-	private DNI dni;
 	@Lob
 	private byte[] password;
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -30,9 +29,8 @@ public class UsuarioJPA implements Serializable{
 		super();
 	}
 
-	public UsuarioJPA(DNI dni, byte[] password, Rol rol) {
+	public UsuarioJPA(byte[] password, Rol rol) {
 		super();
-		this.dni = dni;
 		this.password = password;
 		this.rol = rol;
 	}
@@ -43,14 +41,6 @@ public class UsuarioJPA implements Serializable{
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public DNI getDni() {
-		return dni;
-	}
-
-	public void setDni(DNI dni) {
-		this.dni = dni;
 	}
 
 	public byte[] getPassword() {
