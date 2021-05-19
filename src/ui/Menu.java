@@ -58,10 +58,10 @@ public class Menu {
 			}
 			switch(respuesta) {
 				case 1:
-					registrarse();
+					//registrarse();
 					break;
 				case 2:
-					login();
+					//login();
 					break;
 				case 0:
 					break;
@@ -97,12 +97,12 @@ public class Menu {
 		userman.disconnect();
 		dbman.disconnect();
 	}
-
+/*
 	private static void registrarse() {
 		try {
 			System.out.println("Indique su DNI:");
 			//Buscar DNI
-			DNI dni = reader.readLine();
+			String dni = reader.readLine();
 			System.out.println("Indique su contraseña:");
 			String pass = reader.readLine();
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -147,7 +147,7 @@ public class Menu {
 	private static void login() {
 		
 	}
-
+*/
 	private static void menuAdministrador() {
 		int respuesta = -1;
 		while(respuesta != 0) {
