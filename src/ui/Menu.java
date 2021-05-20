@@ -66,7 +66,7 @@ public class Menu {
 					login();
 					break;
 				case 3:
-					//actualizarPassword();
+					actualizarPassword();
 					break;
 				case 4:
 					//borrarUsuario();
@@ -119,6 +119,13 @@ public class Menu {
 				
 					Usuario usuario = new Usuario (usuarioJPA.getId(), dni, nombre, apellido, direccion, tarjeta);
 					dbman.addUsuario(usuario);
+				}else {
+					/*En nuestro diseño hemos decidido que un Administrador NO es un usuario.
+					 Por tanto, no le incluimos en la tabla de Usuarios, ni le solicitamos más datos
+					 */
+					UsuarioJPA usuarioJPA = new UsuarioJPA(email, hash, rol);
+					userman.addUsuario(usuarioJPA);
+					System.out.println("Te has registrado con éxito");
 				}
 			}
 		} catch (IOException e) {
@@ -142,7 +149,14 @@ public class Menu {
 				System.out.println("Email o contraseña incorrectos");
 			} else {
 			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
-			    System.out.println("Bienvenido " + usuario.getNombre());
+			    if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
+			    	//En este caso es un Usuario y cuenta con el atributo nombre
+			    	 System.out.println("Bienvenido " + usuario.getNombre());
+			    	 System.out.println("\n");
+			    }else {
+			    	//Si soy admin, no tengo ese atributo nombre
+			    	 System.out.println("Bienvenido Administrador\n");
+			    }
 			    
 				if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("admin")) {
 					menuAdministrador();
@@ -157,7 +171,7 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
-	/*
+	
 	private static void actualizarPassword() {
 		try {
 			System.out.println("Indique su email:");
@@ -171,7 +185,14 @@ public class Menu {
 				System.out.println("Email o contraseña incorrectos");
 			} else {
 			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
-			    System.out.println("Bienvenido " + usuario.getNombre());
+			    if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
+			    	//En este caso es un Usuario y cuenta con el atributo nombre
+			    	 System.out.println("Bienvenido " + usuario.getNombre());
+			    	 System.out.println("\n");
+			    }else {
+			    	//Si soy admin, no tengo ese atributo nombre
+			    	 System.out.println("Bienvenido Administrador\n");
+			    }
 			    
 			    System.out.println("Introduzca la nueva contraseña: ");
 			    String nuevaPass = reader.readLine();
@@ -180,15 +201,15 @@ public class Menu {
 			    	System.out.println("Introduzca de nuevo la contraseña");
 			    	comprobarPass = reader.readLine();
 			    }
-			    int idUsuarioJPA = usuario.getId();
+			    int idUsuarioJPA = usuarioJPA.getId();
 			    userman.cambiarPassword(idUsuarioJPA, nuevaPass);
+			    System.out.println("Su contraseña ha sido actualizada correctamente");
 			}
 		} catch (IOException e) {
 			LOGGER.severe("Error al hacer login");
 			e.printStackTrace();
 		}
 	}
-	*/
 
 	private static void menuAdministrador() {
 		int respuesta = -1;

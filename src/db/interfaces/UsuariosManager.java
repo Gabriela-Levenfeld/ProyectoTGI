@@ -21,7 +21,7 @@ public interface UsuariosManager {
 
 	UsuarioJPA checkPass(String email, String pass);
 
-//	void cambiarPassword(int idUsuarioJPA, String nuevaPass);
+	void cambiarPassword(int idUsuarioJPA, String nuevaPass);
 
 	
 }

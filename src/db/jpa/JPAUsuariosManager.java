@@ -90,7 +90,7 @@ public class JPAUsuariosManager implements UsuariosManager{
 			return null;
 		}
 	}
-/*
+
 	@Override
 	public void cambiarPassword(int idUsuarioJPA, String nuevaPass) {
 		try{
@@ -110,5 +110,5 @@ public class JPAUsuariosManager implements UsuariosManager{
 		}
 		
 	}
-	*/
+	
 }
