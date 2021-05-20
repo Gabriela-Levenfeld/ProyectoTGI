@@ -5,6 +5,7 @@ import java.util.List;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
 import pojos.Tienda;
+import pojos.Usuario;
 import pojos.Vehiculo;
 
 public interface DBManager {
@@ -41,4 +42,8 @@ public interface DBManager {
 	public List<Tienda> mostrarTiendas();
 
 	public void insertarTienda(Tienda tiendas);
+
+	public void addUsuario(Usuario usuario);
+	
+	public Usuario searchUsuarioById(Integer idUsuario);
 }

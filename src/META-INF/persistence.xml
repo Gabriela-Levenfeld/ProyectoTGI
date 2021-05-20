@@ -17,7 +17,7 @@
 			<property name="javax.persistence.jdbc.driver"
 				value="org.sqlite.JDBC" />
 			<property name="javax.persistence.jdbc.url"
-				value="jdbc:sqlite:./db/coche.db" />
+				value="jdbc:sqlite:./db/coches.db" />
 			<!-- JPA doesn't create the schema -->
 			<property name="eclipselink.ddl-generation"
 				value="create-tables" />

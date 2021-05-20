@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -22,7 +23,6 @@ import pojos.Usuario;
 import pojos.UsuarioJPA;
 import pojos.Vehiculo;
 
-//Opcion: "MODIFICAR PRECIO" NO FUNCIONA
 
 public class Menu {
 	final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
@@ -47,6 +47,8 @@ public class Menu {
 			System.out.println("\nElige una opción:");
 			System.out.println("1. Registrarse");
 			System.out.println("2. Login");
+			System.out.println("3. Actualizar contraseña");
+			System.out.println("4. Borrar usuario");
 			System.out.println("0. Salir");
 			try {
 				respuesta = Integer.parseInt(reader.readLine());
@@ -58,57 +60,38 @@ public class Menu {
 			}
 			switch(respuesta) {
 				case 1:
-					//registrarse();
+					registrarse();
 					break;
 				case 2:
-					//login();
+					login();
 					break;
-				case 0:
+				case 3:
+					//actualizarPassword();
 					break;
-			}
-		} while (respuesta != 0);
-
-		/*
-		do {
-			System.out.println("\nElige una opción:");
-			System.out.println("1. Usuario");
-			System.out.println("2. Administrador");
-			System.out.println("0. Salir");
-			try {
-				respuesta = Integer.parseInt(reader.readLine());
-				LOGGER.info("El usuario elige " + respuesta);
-			} catch (NumberFormatException | IOException e) {
-				respuesta = -1;
-				LOGGER.warning("El usuario no ha introducido un número");
-				e.printStackTrace();
-			}
-			switch(respuesta) {
-				case 1:
-					menuUsuario();
-					break;
-				case 2:
-					menuAdministrador();
+				case 4:
+					//borrarUsuario();
 					break;
 				case 0:
 					System.out.println("Fin del programa");
 					break;
 			}
-		}while(respuesta != 0);*/
+		} while (respuesta != 0);
+		
 		userman.disconnect();
 		dbman.disconnect();
 	}
-/*
+
 	private static void registrarse() {
 		try {
-			System.out.println("Indique su DNI:");
-			//Buscar DNI
-			String dni = reader.readLine();
+			System.out.println("Indique su email:");
+			String email = reader.readLine();
 			System.out.println("Indique su contraseña:");
 			String pass = reader.readLine();
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(pass.getBytes());
 			byte[] hash = md.digest();
 			
+			System.out.println("Roles disponibles");
 			System.out.println(userman.getRoles());
 			System.out.println("Indique el id del rol:");
 			int rolId = Integer.parseInt(reader.readLine());
@@ -116,38 +99,97 @@ public class Menu {
 			if(rol == null) {
 				System.out.println("No existe dicho rol.");
 			}else {
-				System.out.println("Indique su nombre:");
-				String nombre = reader.readLine();
-				System.out.println("Indique su apellido:");
-				String apellido = reader.readLine();
-				System.out.println("Indique su Código Postal:");
-				int codigoPostal = Integer.parseInt(reader.readLine());
-				System.out.println("Indique su direccion:");
-				String direccion = reader.readLine();
-				System.out.println("Indique su número de tarjeta:");
-				int tarjeta = Integer.parseInt(reader.readLine());				
+				if(rolId==1) {
+					System.out.println("Indique su DNI:");
+					String dni = reader.readLine();
+					System.out.println("Indique su nombre:");
+					String nombre = reader.readLine();
+					System.out.println("Indique su apellido:");
+					String apellido = reader.readLine();
+					System.out.println("Indique su direccion:");
+					String direccion = reader.readLine();
+					System.out.println("Indique su número de tarjeta:");
+					int tarjeta = Integer.parseInt(reader.readLine());	
+				
+					UsuarioJPA usuarioJPA = new UsuarioJPA(email, hash, rol);
+					LOGGER.info(usuarioJPA.toString());
+					userman.addUsuario(usuarioJPA);
+					System.out.println("Te has registrado con éxito");
+					LOGGER.info(usuarioJPA.toString());
+				
+					Usuario usuario = new Usuario (usuarioJPA.getId(), dni, nombre, apellido, direccion, tarjeta);
+					dbman.addUsuario(usuario);
+				}
 			}
-			
-			UsuarioJPA usuario = new UsuarioJPA(dni, hash, rol);
-			LOGGER.info(usuario.toString());
-			userman.addUsuario(usuario);
-			System.out.println("Te has registrado con éxito");
-			LOGGER.info(usuario.toString());
-			Cliente cliente = new Cliente (usuario.getId(), nombre);
-			dbman.addCliente(cliente);
 		} catch (IOException e) {
 			LOGGER.warning("Error al registrarse");
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	private static void login() {
-		
+		try {
+			System.out.println("Indique su email:");
+			String email = reader.readLine();
+			System.out.println("Indique su contraseña:");
+			String pass = reader.readLine();
+			
+			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
+			
+			if (usuarioJPA == null) {
+				System.out.println("Email o contraseña incorrectos");
+			} else {
+			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
+			    System.out.println("Bienvenido " + usuario.getNombre());
+			    
+				if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("admin")) {
+					menuAdministrador();
+				} else if (usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
+					menuUsuario();
+				} else {
+					LOGGER.warning("Rol incorrecto");
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.severe("Error al hacer login");
+			e.printStackTrace();
+		}
 	}
-*/
+	/*
+	private static void actualizarPassword() {
+		try {
+			System.out.println("Indique su email:");
+			String email = reader.readLine();
+			System.out.println("Indique su contraseña:");
+			String pass = reader.readLine();
+			
+			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
+			
+			if (usuarioJPA == null) {
+				System.out.println("Email o contraseña incorrectos");
+			} else {
+			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
+			    System.out.println("Bienvenido " + usuario.getNombre());
+			    
+			    System.out.println("Introduzca la nueva contraseña: ");
+			    String nuevaPass = reader.readLine();
+			    String comprobarPass="";
+			    while(!nuevaPass.equals(comprobarPass)) {
+			    	System.out.println("Introduzca de nuevo la contraseña");
+			    	comprobarPass = reader.readLine();
+			    }
+			    int idUsuarioJPA = usuario.getId();
+			    userman.cambiarPassword(idUsuarioJPA, nuevaPass);
+			}
+		} catch (IOException e) {
+			LOGGER.severe("Error al hacer login");
+			e.printStackTrace();
+		}
+	}
+	*/
+
 	private static void menuAdministrador() {
 		int respuesta = -1;
 		while(respuesta != 0) {
@@ -204,7 +246,6 @@ public class Menu {
 		while(respuesta != 0) {
 			System.out.println("Elije una opción: ");
 			System.out.println("1- Mostrar catálogo");
-			System.out.println("2- Registro");
 			//System.out.println("3- Compra");
 			System.out.println("0- Regreso a menú principal");	
 			try {

@@ -13,12 +13,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Usuarios")
+@Table(name = "UsuariosJPA")
 public class UsuarioJPA implements Serializable{
 	private static final long serialVersionUID = -2106794076158643301L;
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
+	private String email;
 	@Lob
 	private byte[] password;
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -29,10 +30,19 @@ public class UsuarioJPA implements Serializable{
 		super();
 	}
 
-	public UsuarioJPA(byte[] password, Rol rol) {
+	public UsuarioJPA(String email, byte[] password, Rol rol) {
 		super();
+		this.email = email;
 		this.password = password;
 		this.rol = rol;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public Integer getId() {
@@ -83,6 +93,10 @@ public class UsuarioJPA implements Serializable{
 			return false;
 		return true;
 	}
-	//Meter el toString correcto, no sé que hay que incluir y que no
+	
+	@Override
+	public String toString() {
+		return "UsuarioJPA [id=" + id + ", email=" + email + ", rol=" + rol + "]";
+	}
 
 }

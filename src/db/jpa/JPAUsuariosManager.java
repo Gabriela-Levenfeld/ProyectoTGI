@@ -1,15 +1,20 @@
 package db.jpa;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
 import db.interfaces.UsuariosManager;
 import pojos.Rol;
+import pojos.Usuario;
+import pojos.UsuarioJPA;
 
 public class JPAUsuariosManager implements UsuariosManager{
 	
@@ -61,5 +66,49 @@ public class JPAUsuariosManager implements UsuariosManager{
 		}else {
 			return rolEntontrado;
 		}
-	}	
+	}
+	
+	@Override
+	public void addUsuario(UsuarioJPA usuario) {
+		em.getTransaction().begin();
+		em.persist(usuario);
+		em.getTransaction().commit();
+	}
+
+	@Override
+	public UsuarioJPA checkPass(String email, String pass) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(pass.getBytes());
+			byte[] hash = md.digest();
+			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE email = ? AND password = ?", UsuarioJPA.class);
+			q.setParameter(1, email);
+			q.setParameter(2, hash);
+			UsuarioJPA usuario = (UsuarioJPA) q.getSingleResult();
+			return usuario;
+		}catch(NoSuchAlgorithmException | NoResultException e) {
+			return null;
+		}
+	}
+/*
+	@Override
+	public void cambiarPassword(int idUsuarioJPA, String nuevaPass) {
+		try{
+			//MessageDigest md = MessageDigest.getInstance("SHA-512");
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(nuevaPass.getBytes());
+			byte [] hash = md.digest();
+			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE ID = ?",UsuarioJPA.class);
+			q.setParameter(1, idUsuarioJPA);
+			UsuarioJPA usuario = (UsuarioJPA) q.getSingleResult();
+			
+			em.getTransaction().begin();
+			usuario.setPassword(hash);
+			em.getTransaction().commit();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+	*/
 }

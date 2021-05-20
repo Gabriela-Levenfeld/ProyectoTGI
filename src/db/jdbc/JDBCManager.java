@@ -14,6 +14,7 @@ import db.interfaces.DBManager;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
 import pojos.Tienda;
+import pojos.Usuario;
 import pojos.Vehiculo;
 
 public class JDBCManager implements DBManager {
@@ -34,6 +35,9 @@ public class JDBCManager implements DBManager {
 	private final String updatePrecio = "UPDATE PiezasVehiculos SET Precio = ? WHERE Id = ?;";
 	private final String searchTiendas ="SELECT * FROM Tiendas;";
 	private final String insertarTiendas = "INSERT INTO Tiendas (Localizacion, Horario) VALUES (?,?);";
+	private final String addUsuario ="INSERT INTO Usuarios VALUES (?,?,?,?,?,?);" ;
+	private final String searchUsuarioById = "SELECT * FROM Usuarios WHERE Id = ?;";
+	
 	
 	@Override
 	public void connect() {
@@ -70,7 +74,7 @@ public class JDBCManager implements DBManager {
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas ON DELETE CASCADE, IdUsuario INTEGER REFERENCES Usuarios ON DELETE CASCADE)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-					+ "Usuarios (Dni STRING PRIMARY KEY, Nombre STRING, Apellidos STRING, CodigoPostal INTEGER, Direccion STRING, Localidad STRING, Tarjeta INTEGER)");
+					+ "Usuarios (Id INTEGER PRIMARY KEY, Dni STRING, Nombre STRING, Apellidos STRING, Direccion STRING, Tarjeta INTEGER)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "PedidosPiezaVehiculo (Id INTEGER PRIMARY KEY, Cantidad INTEGER, IdPedido INTEGER REFERENCES Pedidos ON DELETE CASCADE, IdPiezaVehiculo REFERENCES PiezasVehiculos ON DELETE CASCADE)");
 			stmt.close();
@@ -373,5 +377,43 @@ public class JDBCManager implements DBManager {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void addUsuario(Usuario usuario) {
+        try {
+            PreparedStatement prep = c.prepareStatement(addUsuario);
+            prep.setInt(1, usuario.getId());
+            prep.setString(2, usuario.getDni());
+            prep.setString(3, usuario.getNombre());
+            prep.setString(4, usuario.getApellido());
+            prep.setString(5, usuario.getDireccion());
+            prep.setInt(6, usuario.getTarjeta());
+            prep.executeUpdate();
+            prep.close();
+        } catch (SQLException e) {
+            LOGGER.severe("Error al insertar usuario: " + usuario);
+            e.printStackTrace();
+        }
+	}
+	
+    @Override
+    public Usuario searchUsuarioById(Integer idUsuario) {
+    	Usuario usuario = null;
+        try {
+            PreparedStatement prep = c.prepareStatement(searchUsuarioById);
+            prep.setInt(1, idUsuario);
+            ResultSet rs = prep.executeQuery();
+            while(rs.next()){
+                String nombre = rs.getString("Nombre");
+                usuario = new Usuario(idUsuario, nombre);
+                LOGGER.fine("Cliente encontrado buscando por id: " + usuario);
+            }
+            prep.close();
+        } catch (SQLException e) {
+            LOGGER.severe("Error al hacer un SELECT");
+            e.printStackTrace();
+        }
+        return usuario;
+    }
 
 }
