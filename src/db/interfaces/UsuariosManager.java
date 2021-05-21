@@ -23,5 +23,7 @@ public interface UsuariosManager {
 
 	void cambiarPassword(int idUsuarioJPA, String nuevaPass);
 
+	void cambiarEmail(int idUsuarioJPA, String nuevoEmail);
+
 	
 }

@@ -48,7 +48,8 @@ public class Menu {
 			System.out.println("1. Registrarse");
 			System.out.println("2. Login");
 			System.out.println("3. Actualizar contraseña");
-			System.out.println("4. Borrar usuario");
+			System.out.println("4. Actualizar email");
+			System.out.println("5. Darse de baja en la Base de Datos");
 			System.out.println("0. Salir");
 			try {
 				respuesta = Integer.parseInt(reader.readLine());
@@ -69,7 +70,10 @@ public class Menu {
 					actualizarPassword();
 					break;
 				case 4:
-					//borrarUsuario();
+					actualizarEmail();
+					break;
+				case 5:
+					borrarUsuario();
 					break;
 				case 0:
 					System.out.println("Fin del programa");
@@ -121,7 +125,7 @@ public class Menu {
 					dbman.addUsuario(usuario);
 				}else {
 					/*En nuestro diseño hemos decidido que un Administrador NO es un usuario.
-					 Por tanto, no le incluimos en la tabla de Usuarios, ni le solicitamos más datos
+					 Por tanto, no le incluimos en la tabla de Usuarios, ni le solicitamos más datos que los necesarios para Usuario JPA
 					 */
 					UsuarioJPA usuarioJPA = new UsuarioJPA(email, hash, rol);
 					userman.addUsuario(usuarioJPA);
@@ -146,6 +150,7 @@ public class Menu {
 			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
 			
 			if (usuarioJPA == null) {
+				System.out.println("ACCESO DENEGADO");
 				System.out.println("Email o contraseña incorrectos");
 			} else {
 			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
@@ -182,6 +187,7 @@ public class Menu {
 			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
 			
 			if (usuarioJPA == null) {
+				System.out.println("ACCESO DENEGADO");
 				System.out.println("Email o contraseña incorrectos");
 			} else {
 			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
@@ -190,7 +196,7 @@ public class Menu {
 			    	 System.out.println("Bienvenido " + usuario.getNombre());
 			    	 System.out.println("\n");
 			    }else {
-			    	//Si soy admin, no tengo ese atributo nombre
+			    	//Si soy admin, no tengo ese atributo nombre e imprimimos un mensaje general
 			    	 System.out.println("Bienvenido Administrador\n");
 			    }
 			    
@@ -209,6 +215,45 @@ public class Menu {
 			LOGGER.severe("Error al hacer login");
 			e.printStackTrace();
 		}
+	}
+	private static void actualizarEmail() {
+		try {
+			System.out.println("Indique su email:");
+			String email = reader.readLine();
+			System.out.println("Indique su contraseña:");
+			String pass = reader.readLine();
+			
+			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
+			
+			if (usuarioJPA == null) {
+				System.out.println("ACCESO DENEGADO");
+				System.out.println("Email o contraseña incorrectos");
+			} else {
+			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
+			    if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
+			    	//En este caso es un Usuario y cuenta con el atributo nombre
+			    	 System.out.println("Bienvenido " + usuario.getNombre());
+			    	 System.out.println("\n");
+			    }else {
+			    	//Si soy admin, no tengo ese atributo nombre e imprimimos un mensaje general
+			    	 System.out.println("Bienvenido Administrador\n");
+			    }
+			    
+			    System.out.println("Introduzca el nuevo email: ");
+			    String nuevoEmail = reader.readLine();
+			    
+			    int idUsuarioJPA = usuarioJPA.getId();
+			    userman.cambiarEmail(idUsuarioJPA, nuevoEmail);
+			    System.out.println("Su email ha sido actualizado correctamente");
+			}
+		} catch (IOException e) {
+			LOGGER.severe("Error al hacer login");
+			e.printStackTrace();
+		}
+	}
+	private static void borrarUsuario() {
+		/* En este método vamos a borrar al usuario tanto en nuestra tabla UsuarioJPA como en nuestra tabla Usuarios (perteneciente a JDBC)
+		*/
 	}
 
 	private static void menuAdministrador() {

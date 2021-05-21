@@ -100,15 +100,30 @@ public class JPAUsuariosManager implements UsuariosManager{
 			byte [] hash = md.digest();
 			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE ID = ?",UsuarioJPA.class);
 			q.setParameter(1, idUsuarioJPA);
-			UsuarioJPA usuario = (UsuarioJPA) q.getSingleResult();
+			UsuarioJPA usuarioJPA = (UsuarioJPA) q.getSingleResult();
 			
 			em.getTransaction().begin();
-			usuario.setPassword(hash);
+			usuarioJPA.setPassword(hash);
 			em.getTransaction().commit();
 		} catch(Exception e){
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public void cambiarEmail(int idUsuarioJPA, String nuevoEmail) {
+		try{
+			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE ID = ?",UsuarioJPA.class);
+			q.setParameter(1, idUsuarioJPA);
+			UsuarioJPA usuarioJPA = (UsuarioJPA) q.getSingleResult();
+			
+			em.getTransaction().begin();
+			usuarioJPA.setEmail(nuevoEmail);
+			em.getTransaction().commit();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 }
