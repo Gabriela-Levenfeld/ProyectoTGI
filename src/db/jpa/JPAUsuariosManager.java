@@ -74,11 +74,15 @@ public class JPAUsuariosManager implements UsuariosManager{
 		em.persist(usuario);
 		em.getTransaction().commit();
 	}
-
+	
+	/*
+	 Hemos decidido cambiar el tipo de encriptación por uno más seguro y adecuado para nuestra BD
+	 */
 	@Override
 	public UsuarioJPA checkPass(String email, String pass) {
 		try {
-			MessageDigest md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			//MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(pass.getBytes());
 			byte[] hash = md.digest();
 			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE email = ? AND password = ?", UsuarioJPA.class);
@@ -94,8 +98,8 @@ public class JPAUsuariosManager implements UsuariosManager{
 	@Override
 	public void cambiarPassword(int idUsuarioJPA, String nuevaPass) {
 		try{
-			//MessageDigest md = MessageDigest.getInstance("SHA-512");
-			MessageDigest md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			//MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(nuevaPass.getBytes());
 			byte [] hash = md.digest();
 			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE ID = ?",UsuarioJPA.class);

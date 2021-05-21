@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -15,6 +17,8 @@ import db.jdbc.JDBCManager;
 import db.jpa.JPAUsuariosManager;
 import logging.MyLogger;
 import pojos.DNI;
+import pojos.Pedido;
+import pojos.PedidoPiezaVehiculo;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
 import pojos.Rol;
@@ -30,6 +34,7 @@ public class Menu {
 	private static UsuariosManager userman = new JPAUsuariosManager();
 	private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 	
+	private final static DateTimeFormatter formatterPedido= DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	private final static String[] TIENDAS_NOMBRES = {"Pozuelo", "Alcobendas", "Madrid", "Parla"};
 	private final static String[] TIENDAS_HORARIO = {"8:00-14:00","8:00-14:00", "14:00-20:00","8:00-20:00"};
 	
@@ -91,7 +96,8 @@ public class Menu {
 			String email = reader.readLine();
 			System.out.println("Indique su contraseña:");
 			String pass = reader.readLine();
-			MessageDigest md = MessageDigest.getInstance("MD5");
+			MessageDigest md = MessageDigest.getInstance("SHA-512");
+			//MessageDigest md = MessageDigest.getInstance("MD5");
 			md.update(pass.getBytes());
 			byte[] hash = md.digest();
 			
@@ -162,11 +168,11 @@ public class Menu {
 			    	//Si soy admin, no tengo ese atributo nombre
 			    	 System.out.println("Bienvenido Administrador\n");
 			    }
-			    
+//ESTO DEBERIA ESTAR INCLUIDO ARRIBA
 				if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("admin")) {
 					menuAdministrador();
 				} else if (usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
-					menuUsuario();
+					menuUsuario(usuario);
 				} else {
 					LOGGER.warning("Rol incorrecto");
 				}
@@ -344,7 +350,7 @@ public class Menu {
 		}	
 	}
 	
-	private static void menuUsuario() {
+	private static void menuUsuario(Usuario usuario) {
 		int respuesta = -1;
 		while(respuesta != 0) {
 			System.out.println("Elije una opción: ");
@@ -365,7 +371,7 @@ public class Menu {
 				case 2:
 					break;
 				case 3:
-					//compra();
+					//compra(usuario);
 					break;
 				case 0:
 					System.out.println("Fin");
@@ -548,51 +554,74 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
-	/*
-	private static void compra() {
+	
+	private static void compra(Usuario usuario) {
 		List<Tienda> tiendas = dbman.mostrarTiendas();
 		if(tiendas.size()==0) {
 			generarTiendas();
-			System.out.println("Estoy en el if");
 		}else {
-			System.out.println("Estoy en el else");
 			try {
-			//PEDIDO tiene:
-			 //	private Date fecha;
-				//private boolean online;
-				//private Tienda tienda;
-				//private Usuario usuario;
-				
 				System.out.println("COMPRA\n");
-				//Pedir DNI
-				mostrarPiezaVehiculoPrecio();
+				mostrarPiezaVehiculoPrecio(); //Mostramos los productos disponibles (con precio incluido)
 				System.out.println("Introduzca el id de la fila a comprar:");
 				int idCompra = Integer.parseInt(reader.readLine());
-				
-				System.out.println("Introduzca la cantidad a comprar:");
-				int cantidad = Integer.parseInt(reader.readLine());
-				
-				System.out.println("¿Pedido online?(s/n)");
-				String respuesta = reader.readLine();
-				if(respuesta.equalsIgnoreCase("n")) { //En tienda
-					mostrarTiendas();
-					System.out.println("Introduzca el id de la tienda donde quiera recoger el pedido:");
-					int idTienda = Integer.parseInt(reader.readLine());
+				PiezaVehiculo piezaVehiculo = dbman.searchPiezasVehiculosById(idCompra);
+				if(piezaVehiculo==null) {
+					//No existe dicho producto y se finaliza el método
+					System.out.println("El pedido no se ha podido realizar porque no existe dicho producto");
 				}else {
-					System.out.println("El pedido se enviará a su casa.");
+					//Existe el id y se prosigue con la compra
+					System.out.println("Introduzca la cantidad a comprar:");
+					int cantidad=-1;
+					do {
+						cantidad = Integer.parseInt(reader.readLine());
+						System.out.println("Por favor, introduzca una cantidad coherente...");
+					}while(cantidad<=0); //No se establece un limite superior ya que hemos supuesto stock infinito
+					
+					String respuesta = "";
+					do {
+						System.out.println("¿Desea recibir el pedido a domicilio?(s/n)");
+						respuesta = reader.readLine();
+					}while(!respuesta.equalsIgnoreCase("n") || !respuesta.equalsIgnoreCase("s"));
+					boolean online;
+					int seleccionTienda;
+					Tienda tienda;
+					if(respuesta.equalsIgnoreCase("n")) {
+						//El usuario selecciona "Recoger el pedido en una Tienda Física" (Online=NO)
+						online = false;
+						mostrarTiendas();
+						seleccionTienda = -1;
+						do {
+							//Se obliga al usuario a seleccionar una tienda existente
+							System.out.println("Seleccione el id de la Tienda donde desee recoger su pedido");
+							seleccionTienda = Integer.parseInt(reader.readLine());
+						}while(dbman.searchTiendaById(seleccionTienda) == null);
+						tienda = dbman.searchTiendaById(seleccionTienda);
+					}else {
+						//El usuario selecciona "Recibir el pedido en su domicilio" (Online=SÍ)
+						online = true;
+						tienda = null;
+					}
+					//Generamos una fecha con el siguiente formato: "yyyy-MM-dd HH:mm"
+					LocalDate fecha = LocalDate.parse(reader.readLine(), formatterPedido);
+					
+					//En ambos casos necesitamos un Usuario, motivo por el que se lo pasamos a este métodos desde el momento en el que hace login
+					Pedido pedido = new Pedido(Date.valueOf(fecha), online, tienda, usuario);
+					
+					//Hay que hacer un dbman.addPedido
+						
+						
+						
+					//PedidoPiezaVehiculo pedidoPiezaVehiculo = new PedidoPiezaVehiculo(pedido, cantidad, piezaVehiculo);
+					//Hay que hacer un dbman.addpedidoPiezaVehiculo
+					}
+					
+				} catch (NullPointerException | IOException e) {
+					e.printStackTrace();
 				}
-				Pedido pedido = new Pedido();
-				PedidoPiezaVehiculo pedidoPiezaVehiculo = new PedidoPiezaVehiculo();
-				
-				System.out.println("Fin del pedido, que tenga un buen día");
-				
-			} catch (NullPointerException | IOException e) {
-				e.printStackTrace();
-			}
 		}
 	}
-*/
-	
+
 	private static void generarTiendas() {
 		int numTiendas = 4;
 		for(int i = 0; i < numTiendas; i++) {
@@ -600,12 +629,11 @@ public class Menu {
 			dbman.insertarTienda(tienda);
 		}
 		System.out.println("Se han generado " + numTiendas + " tiendas.");
-		mostrarTiendas();
 	}
 	
 	private static void mostrarTiendas() {
 		List<Tienda> tiendas = dbman.mostrarTiendas();
-		System.out.println("Se han encontrado las siguientes tiendas: ");
+		System.out.println("Tiendas disponibles: ");
 		for(Tienda tienda : tiendas) {
 			System.out.println(tienda);
 		}

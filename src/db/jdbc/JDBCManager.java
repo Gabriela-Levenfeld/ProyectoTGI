@@ -38,6 +38,8 @@ public class JDBCManager implements DBManager {
 	private final String addUsuario ="INSERT INTO Usuarios VALUES (?,?,?,?,?,?);" ;
 	private final String searchUsuarioById = "SELECT * FROM Usuarios WHERE Id = ?;";
 	private final String eliminarUnUsuario = "DELETE FROM Usuarios WHERE Id = ?;";
+	private final String searchPiezaVehiculoById = "SELECT * FROM PiezasVehiculos WHERE Id = ?;";
+	private final String searchTiendaById =  "SELECT * FROM Tiendas WHERE Id = ?;";
 	
 	@Override
 	public void connect() {
@@ -427,6 +429,57 @@ public class JDBCManager implements DBManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}	
+	}
+
+
+	@Override
+	public PiezaVehiculo searchPiezasVehiculosById(int idCompra) {
+		PiezaVehiculo piezaVehiculo = null;
+		try {
+            PreparedStatement prep = c.prepareStatement(searchPiezaVehiculoById);
+            prep.setInt(1, idCompra);
+            ResultSet rs = prep.executeQuery();
+            while(rs.next()){
+                int idPieza = rs.getInt("IdPieza");
+                Pieza pieza = searchPiezaById(idPieza);
+                
+                String modelo = rs.getString("Modelo");
+                Vehiculo vehiculo= searchVehiculoByModelo(modelo);
+              
+                double precio = rs.getDouble("Precio");
+                
+                piezaVehiculo = new PiezaVehiculo(pieza, vehiculo, precio);
+                LOGGER.fine("Relacion pieza-vehiculo encontrada buscando por id: " + piezaVehiculo);
+            }
+            prep.close();
+        } catch (SQLException e) {
+            LOGGER.severe("Error al hacer un SELECT");
+            e.printStackTrace();
+        }
+		return piezaVehiculo;
+	}
+
+
+	@Override
+	public Tienda searchTiendaById(int seleccionTienda) {
+		Tienda tienda = null;
+		try {
+			PreparedStatement prep = c.prepareStatement(searchTiendaById);
+			prep.setInt(1, seleccionTienda);
+			ResultSet rs = prep.executeQuery();
+			while(rs.next()){
+				int idTienda = rs.getInt("Id");
+				String localizacion = rs.getString("Localizacion");
+				String horario = rs.getString("Horario");
+				tienda = new Tienda(idTienda, localizacion, horario);
+				LOGGER.fine("Pieza encontrada buscada por id: " + tienda);
+			}
+			prep.close();
+		} catch (SQLException e) {
+			LOGGER.severe("Error al hacer un SELECT");
+			e.printStackTrace();
+		}
+		return tienda;
 	}
 
 }

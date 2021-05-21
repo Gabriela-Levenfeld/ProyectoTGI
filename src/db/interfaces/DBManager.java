@@ -49,4 +49,9 @@ public interface DBManager {
 
 	public void eliminarUsuarioById(int id);
 
+	//Métodos nuevos añadidos
+	public PiezaVehiculo searchPiezasVehiculosById(int idCompra);
+
+	public Tienda searchTiendaById(int seleccionTienda);
+
 }
