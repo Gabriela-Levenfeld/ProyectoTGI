@@ -251,9 +251,46 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
+	
 	private static void borrarUsuario() {
-		/* En este método vamos a borrar al usuario tanto en nuestra tabla UsuarioJPA como en nuestra tabla Usuarios (perteneciente a JDBC)
+		/* En este método vamos a borrar al usuario tanto en nuestra tabla UsuarioJPA como en nuestra tabla Usuarios
+		 * (perteneciente a JDBC)
 		*/
+		
+		try {
+			System.out.println("Indique su email:");
+			String email = reader.readLine();
+			System.out.println("Indique su contraseña:");
+			String pass = reader.readLine();
+			
+			UsuarioJPA usuarioJPA = userman.checkPass(email, pass);
+			
+			if (usuarioJPA == null) {
+				System.out.println("ACCESO DENEGADO");
+				System.out.println("Email o contraseña incorrectos");
+			} else {
+			    Usuario usuario = dbman.searchUsuarioById(usuarioJPA.getId());
+			    if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
+			    	//En este caso es un Usuario y cuenta con el atributo nombre
+			    	 System.out.println("Bienvenido " + usuario.getNombre());
+			    	 System.out.println("\n");
+			    	 
+			    	 //En este caso también hay que borrar al Usuario JDBC
+			    	 dbman.eliminarUsuarioById(usuario.getId());
+							    	 
+			    }else {
+			    	//Si soy admin, no tengo ese atributo nombre e imprimimos un mensaje general
+			    	 System.out.println("Bienvenido Administrador\n");
+			    }
+			    
+			    int idUsuarioJPA = usuarioJPA.getId();
+			    userman.eliminarUsuarioJPA(idUsuarioJPA);
+			    System.out.println("Ha sido dado de baja correctamente");
+			}
+		} catch (IOException e) {
+			LOGGER.severe("Error al hacer login");
+			e.printStackTrace();
+		}
 	}
 
 	private static void menuAdministrador() {

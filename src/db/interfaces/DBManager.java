@@ -46,4 +46,7 @@ public interface DBManager {
 	public void addUsuario(Usuario usuario);
 	
 	public Usuario searchUsuarioById(Integer idUsuario);
+
+	public void eliminarUsuarioById(int id);
+
 }

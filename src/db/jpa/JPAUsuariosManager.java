@@ -125,5 +125,20 @@ public class JPAUsuariosManager implements UsuariosManager{
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void eliminarUsuarioJPA(int idUsuarioJPA) {
+		try{
+			Query q = em.createNativeQuery("SELECT * FROM UsuariosJPA WHERE ID = ?", UsuarioJPA.class);
+			q.setParameter(1, idUsuarioJPA);
+			UsuarioJPA usuarioJPA = (UsuarioJPA) q.getSingleResult();
+			
+			em.getTransaction().begin();
+			em.remove(usuarioJPA);
+			em.getTransaction().commit();
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	
 }

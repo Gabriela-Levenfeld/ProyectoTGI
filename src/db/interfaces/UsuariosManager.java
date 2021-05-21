@@ -25,5 +25,7 @@ public interface UsuariosManager {
 
 	void cambiarEmail(int idUsuarioJPA, String nuevoEmail);
 
+	void eliminarUsuarioJPA(int idUsuarioJPA);
+
 	
 }

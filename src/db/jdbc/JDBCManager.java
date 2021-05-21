@@ -37,7 +37,7 @@ public class JDBCManager implements DBManager {
 	private final String insertarTiendas = "INSERT INTO Tiendas (Localizacion, Horario) VALUES (?,?);";
 	private final String addUsuario ="INSERT INTO Usuarios VALUES (?,?,?,?,?,?);" ;
 	private final String searchUsuarioById = "SELECT * FROM Usuarios WHERE Id = ?;";
-	
+	private final String eliminarUnUsuario = "DELETE FROM Usuarios WHERE Id = ?;";
 	
 	@Override
 	public void connect() {
@@ -415,5 +415,18 @@ public class JDBCManager implements DBManager {
         }
         return usuario;
     }
+
+
+	@Override
+	public void eliminarUsuarioById(int idUsuarioAEliminar) {
+		try {
+			PreparedStatement prep = c.prepareStatement(eliminarUnUsuario);
+			prep.setInt(1,idUsuarioAEliminar);
+			prep.executeUpdate();
+			prep.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
 
 }
