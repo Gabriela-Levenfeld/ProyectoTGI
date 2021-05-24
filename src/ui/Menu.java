@@ -554,7 +554,7 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
-	
+	/*
 	private static void compra(Usuario usuario) {
 		List<Tienda> tiendas = dbman.mostrarTiendas();
 		if(tiendas.size()==0) {
@@ -603,6 +603,7 @@ public class Menu {
 						tienda = null;
 					}
 					//Generamos una fecha con el siguiente formato: "yyyy-MM-dd HH:mm"
+					//Aqui habria que insertarlo automaticamente
 					LocalDate fecha = LocalDate.parse(reader.readLine(), formatterPedido);
 					
 					//En ambos casos necesitamos un Usuario, motivo por el que se lo pasamos a este métodos desde el momento en el que hace login
@@ -621,6 +622,7 @@ public class Menu {
 				}
 		}
 	}
+	*/
 
 	private static void generarTiendas() {
 		int numTiendas = 4;
