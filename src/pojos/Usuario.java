@@ -1,5 +1,9 @@
 package pojos;
 
+import java.util.ArrayList;
+
+import javax.xml.bind.annotation.XmlElement;
+
 public class Usuario {
 	private int id;
 	private String dni;
@@ -7,6 +11,9 @@ public class Usuario {
 	private String apellido;
 	private String direccion;
 	private int tarjeta;
+	
+	//Para simular la relación uno a muchos en java
+	private ArrayList<Pedido> pedidos;
 	
 	public Usuario() {
 		super();

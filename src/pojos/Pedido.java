@@ -1,12 +1,31 @@
 package pojos;
 
+import java.io.Serializable;
 import java.sql.Date;
 
-public class Pedido {
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlRootElement(name = "pedido")
+@XmlAccessorType(XmlAccessType.FIELD)
+
+public class Pedido implements Serializable{
+	private static final long serialVersionUID = -8348912392169638115L;
+	
+	@XmlAttribute
 	private int id;
+	@XmlElement
 	private Date fecha;
+	@XmlElement
 	private boolean online;
-	private Tienda tienda;
+	@XmlTransient
+	private Tienda tienda; //Declarar como transient
+	@XmlElement
 	private Usuario usuario;
 	
 	public Pedido() {
@@ -68,6 +87,30 @@ public class Pedido {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
+	}
+
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Pedido other = (Pedido) obj;
+		if (id != other.id)
+			return false;
+		return true;
 	}
 
 	@Override

@@ -1,0 +1,6 @@
+
+<!DOCTYPE tienda SYSTEM "tienda.dtd">
+<tienda id="1">
+    <localizacion>Pozuelo</localizacion>
+    <horario>8:00-14:00</horario>
+</tienda>

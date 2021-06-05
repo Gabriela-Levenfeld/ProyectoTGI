@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tiendas>
+  <tienda>
+    <title>Shop 1</title>
+    <localizacion>Pozuelo</localizacion>
+    <horario>8:00-14:00</horario>
+  </tienda>
+  <tienda>
+    <title>Shop 2</title>
+    <localizacion>Alcobendas</localizacion>
+    <horario>8:00-14:00</horario>
+  </tienda>
+</tiendas>

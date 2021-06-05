@@ -1,0 +1,4 @@
+<!ELEMENT tienda (id, localizacion, horario)> 
+<!ATTLIST tienda id CDATA #REQUIRED>
+<!ELEMENT localizacion (#PCDATA)>
+<!ELEMENT horario (#PCDATA)> 
