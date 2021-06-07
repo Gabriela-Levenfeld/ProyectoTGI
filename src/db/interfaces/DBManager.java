@@ -2,6 +2,8 @@ package db.interfaces;
 
 import java.util.List;
 
+import pojos.Pedido;
+import pojos.PedidoPiezaVehiculo;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
 import pojos.Tienda;
@@ -53,5 +55,9 @@ public interface DBManager {
 	public PiezaVehiculo searchPiezasVehiculosById(int idCompra);
 
 	public Tienda searchTiendaById(int seleccionTienda);
+
+	public void addPedido(Pedido pedido);
+
+	public void addpedidoPiezaVehiculo(PedidoPiezaVehiculo pedidoPiezaVehiculo);
 
 }

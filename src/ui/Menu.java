@@ -34,7 +34,7 @@ public class Menu {
 	private static UsuariosManager userman = new JPAUsuariosManager();
 	private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 	
-	private final static DateTimeFormatter formatterPedido= DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	private final static DateTimeFormatter formatterPedido= DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private final static String[] TIENDAS_NOMBRES = {"Pozuelo", "Alcobendas", "Madrid", "Parla"};
 	private final static String[] TIENDAS_HORARIO = {"8:00-14:00","8:00-14:00", "14:00-20:00","8:00-20:00"};
 	
@@ -164,16 +164,15 @@ public class Menu {
 			    	//En este caso es un Usuario y cuenta con el atributo nombre
 			    	 System.out.println("Bienvenido " + usuario.getNombre());
 			    	 System.out.println("\n");
-			    }else {
+			    	 
+			    	 System.out.println("MENU USUARIO\n");
+			    	 menuUsuario(usuario);
+			    }else if (usuarioJPA.getRol().getNombre().equalsIgnoreCase("admin")){
 			    	//Si soy admin, no tengo ese atributo nombre
 			    	 System.out.println("Bienvenido Administrador\n");
-			    }
-//ESTO DEBERIA ESTAR INCLUIDO ARRIBA
-				if(usuarioJPA.getRol().getNombre().equalsIgnoreCase("admin")) {
-					menuAdministrador();
-				} else if (usuarioJPA.getRol().getNombre().equalsIgnoreCase("usuarioJPA")) {
-					menuUsuario(usuario);
-				} else {
+			    	 System.out.println("MENU ADMINISTRADOR\n");
+			    	 menuAdministrador();
+			    } else {
 					LOGGER.warning("Rol incorrecto");
 				}
 			}
@@ -355,7 +354,7 @@ public class Menu {
 		while(respuesta != 0) {
 			System.out.println("Elije una opción: ");
 			System.out.println("1- Mostrar catálogo");
-			//System.out.println("3- Compra");
+			//System.out.println("2- Compra");
 			System.out.println("0- Regreso a menú principal");	
 			try {
 				respuesta = Integer.parseInt(reader.readLine());
@@ -369,9 +368,7 @@ public class Menu {
 					mostrarPiezaVehiculoPrecio();
 					break;
 				case 2:
-					break;
-				case 3:
-					//compra(usuario);
+					compra(usuario);
 					break;
 				case 0:
 					System.out.println("Fin");
@@ -554,7 +551,8 @@ public class Menu {
 			e.printStackTrace();
 		}
 	}
-	/*
+
+	//Metodo que da error
 	private static void compra(Usuario usuario) {
 		List<Tienda> tiendas = dbman.mostrarTiendas();
 		if(tiendas.size()==0) {
@@ -575,18 +573,14 @@ public class Menu {
 					int cantidad=-1;
 					do {
 						cantidad = Integer.parseInt(reader.readLine());
-						System.out.println("Por favor, introduzca una cantidad coherente...");
 					}while(cantidad<=0); //No se establece un limite superior ya que hemos supuesto stock infinito
 					
-					String respuesta = "";
-					do {
-						System.out.println("¿Desea recibir el pedido a domicilio?(s/n)");
-						respuesta = reader.readLine();
-					}while(!respuesta.equalsIgnoreCase("n") || !respuesta.equalsIgnoreCase("s"));
+					System.out.println("¿Desea recibir el pedido a domicilio?(s/n)");
+					String seleccionOnline = reader.readLine();
 					boolean online;
 					int seleccionTienda;
 					Tienda tienda;
-					if(respuesta.equalsIgnoreCase("n")) {
+					if(seleccionOnline.equalsIgnoreCase("n")) {
 						//El usuario selecciona "Recoger el pedido en una Tienda Física" (Online=NO)
 						online = false;
 						mostrarTiendas();
@@ -602,19 +596,19 @@ public class Menu {
 						online = true;
 						tienda = null;
 					}
-					//Generamos una fecha con el siguiente formato: "yyyy-MM-dd HH:mm"
-					//Aqui habria que insertarlo automaticamente
-					LocalDate fecha = LocalDate.parse(reader.readLine(), formatterPedido);
+					//Generamos una fecha con el siguiente formato: "yyyy-MM-dd HH:mm:ss"
+					//La fecha se deberia genera automaticamentem, pero no esta muy conseguido
+					LocalDate fecha = LocalDate.parse("2021-06-07 10:11:11", formatterPedido);
 					
+							
 					//En ambos casos necesitamos un Usuario, motivo por el que se lo pasamos a este métodos desde el momento en el que hace login
 					Pedido pedido = new Pedido(Date.valueOf(fecha), online, tienda, usuario);
+					dbman.addPedido(pedido); //Lo añadimos a la BBDD	
+						
+					PedidoPiezaVehiculo pedidoPiezaVehiculo = new PedidoPiezaVehiculo(pedido, cantidad, piezaVehiculo);
+					dbman.addpedidoPiezaVehiculo(pedidoPiezaVehiculo); //Lo añadimos a la BBDD
 					
-					//Hay que hacer un dbman.addPedido
-						
-						
-						
-					//PedidoPiezaVehiculo pedidoPiezaVehiculo = new PedidoPiezaVehiculo(pedido, cantidad, piezaVehiculo);
-					//Hay que hacer un dbman.addpedidoPiezaVehiculo
+					System.out.println("Su pedido se ha realizado correctamente");
 					}
 					
 				} catch (NullPointerException | IOException e) {
@@ -622,7 +616,7 @@ public class Menu {
 				}
 		}
 	}
-	*/
+
 
 	private static void generarTiendas() {
 		int numTiendas = 4;

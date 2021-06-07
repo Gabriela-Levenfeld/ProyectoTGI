@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import db.interfaces.DBManager;
+import pojos.Pedido;
+import pojos.PedidoPiezaVehiculo;
 import pojos.Pieza;
 import pojos.PiezaVehiculo;
 import pojos.Tienda;
@@ -40,6 +42,9 @@ public class JDBCManager implements DBManager {
 	private final String eliminarUnUsuario = "DELETE FROM Usuarios WHERE Id = ?;";
 	private final String searchPiezaVehiculoById = "SELECT * FROM PiezasVehiculos WHERE Id = ?;";
 	private final String searchTiendaById =  "SELECT * FROM Tiendas WHERE Id = ?;";
+	private final String addPedidoEnTienda = "INSERT INTO Pedidos (Fecha, Online, IdTienda, IdUsuario) VALUES (?,?,?,?);";
+	private final String addPedidoOnline = "INSERT INTO Pedidos (Fecha, Online, IdUsuario) VALUES (?,?,?);";
+	private final String addPedidoPiezaVehiculo = "INSERT INTO PedidosPiezaVehiculo (Cantidad, IdPedido, IdPiezaVehiculo) VALUES (?,?,?)";
 	
 	@Override
 	public void connect() {
@@ -74,7 +79,7 @@ public class JDBCManager implements DBManager {
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "Tiendas (Id INTEGER PRIMARY KEY, Localizacion STRING, Horario STRING)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
-					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas ON DELETE CASCADE, IdUsuario INTEGER REFERENCES Usuarios ON DELETE CASCADE)");
+					+ "Pedidos (Id STRING PRIMARY KEY, Fecha DATE, Online NUMERIC, IdTienda INTEGER REFERENCES Tiendas ON DELETE CASCADE ON UPDATE SET NULL, IdUsuario INTEGER REFERENCES Usuarios ON DELETE CASCADE)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
 					+ "Usuarios (Id INTEGER PRIMARY KEY, Dni STRING, Nombre STRING, Apellidos STRING, Direccion STRING, Tarjeta INTEGER)");
 			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS " 
@@ -480,6 +485,50 @@ public class JDBCManager implements DBManager {
 			e.printStackTrace();
 		}
 		return tienda;
+	}
+
+
+	@Override
+	public void addPedido(Pedido pedido) {
+		try {
+			if(pedido.isOnline()==true) {
+				//"Recibir el pedido en su domicilio" (Online=SÍ)
+				PreparedStatement prep = c.prepareStatement(addPedidoOnline);
+				prep.setDate(1, pedido.getFecha());
+				prep.setBoolean(2, pedido.isOnline());
+				prep.setInt(3, pedido.getUsuario().getId());
+				prep.executeUpdate();
+				prep.close();
+			}else {
+				//"Pedido se recoge en tienda" (Online=No)
+				PreparedStatement prep = c.prepareStatement(addPedidoEnTienda);
+				prep.setDate(1, pedido.getFecha());
+				prep.setBoolean(2, pedido.isOnline());
+				prep.setInt(3, pedido.getTienda().getId());
+				prep.setInt(4, pedido.getUsuario().getId());
+				prep.executeUpdate();
+				prep.close();
+			}
+		}catch(SQLException e) {
+			LOGGER.severe("Error al insertar pedido " + pedido);
+			e.printStackTrace();
+		}
+	}
+
+
+	@Override
+	public void addpedidoPiezaVehiculo(PedidoPiezaVehiculo pedidoPiezaVehiculo) {
+		try {
+			PreparedStatement prep = c.prepareStatement(addPedidoPiezaVehiculo);
+			prep.setInt(1, pedidoPiezaVehiculo.getCantidad());
+			prep.setInt(2, pedidoPiezaVehiculo.getPedido().getId());
+			prep.setInt(3, pedidoPiezaVehiculo.getPiezaVehiculo().getId());
+			prep.executeUpdate();
+			prep.close();
+		}catch(SQLException e) {
+			LOGGER.severe("Error al insertar pedidoPiezaVehiculo " + pedidoPiezaVehiculo);
+			e.printStackTrace();
+		}
 	}
 
 }
